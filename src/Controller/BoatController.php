@@ -5,6 +5,7 @@ namespace App\Controller;
 use App\Entity\Boat;
 use App\Form\BoatType;
 use App\Repository\BoatRepository;
+use App\Services\MapManager;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
@@ -21,24 +22,58 @@ class BoatController extends AbstractController
      * Move the boat to coord x,y
      * @Route("/move/{x}/{y}", name="moveBoat", requirements={"x"="\d+", "y"="\d+"}))
      */
-    public function moveBoat(int $x, int $y, BoatRepository $boatRepository, EntityManagerInterface $em) :Response
+    public function moveBoat(int $x, int $y, BoatRepository $boatRepository, EntityManagerInterface $em,MapManager $mapManager) :Response
     {
-        $boat = $boatRepository->findOneBy([]);
-        $boat->setCoordX($x);
-        $boat->setCoordY($y);
 
-        $em->flush();
+        if ($mapManager->tileExists($x, $y) == false){
+            $this->addFlash('alert', 'not found');
+            return $this->redirectToRoute('map');
+        }else{
+            $boat = $boatRepository->findOneBy([]);
+            $boat->setCoordX($x);
+            $boat->setCoordY($y);
+            $em->flush();
+        }
 
         return $this->redirectToRoute('map');
     }
 
+    /**
+     * @Route("/{direction}", name="directionBoat", requirements={"direction"="^N|S|E|W"})
+     */
+    public function moveDirection($direction, BoatRepository $boatRepository,EntityManagerInterface $em): Response
+    {
+        $boat = $boatRepository->findOneBy([]);
+        $x = $boat->getCoordX();
+        $y = $boat->getCoordY();
+        if ($direction == 'E' && $x<11){
+            $east = $boat->setCoordX($x += 1);
+            $em->flush();
+        }
+        if ($direction == 'W' && $x>0){
+            $west = $boat->setCoordX($x -= 1);
+            $em->flush();
+        }
+        if ($direction == 'N' && $y>0){
+            $north = $boat->setCoordY($y -= 1);
+            $em->flush();
+        }
+        if ($direction == 'S'&& $y<5){
+            $south = $boat->setCoordY($y += 1);
+            $em->flush();
+        }
+
+        return $this->redirectToRoute('map');
+    }
 
     /**
      * @Route("/", name="boat_index", methods="GET")
      */
     public function index(BoatRepository $boatRepository): Response
     {
-        return $this->render('boat/index.html.twig', ['boats' => $boatRepository->findAll()]);
+        return $this->render('boat/index.html.twig', [
+            'boats' => $boatRepository->findAll(),
+        ]);
     }
 
     /**
