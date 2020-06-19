@@ -70,6 +70,8 @@ class BoatController extends AbstractController
 
         if ($mapManager->tileExists($boat->getCoordX(), $boat->getCoordY())) {
             $em->flush();
+        } else{
+            $this->addFlash('error', 'Wrong Way ! ');
         }
         return $this->redirectToRoute('map');
     }
