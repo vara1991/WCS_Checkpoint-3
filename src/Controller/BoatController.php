@@ -26,11 +26,11 @@ class BoatController extends AbstractController
         $boat = $boatRepository->findOneBy([]);
         $boat->setCoordX($x);
         $boat->setCoordY($y);
-
         $em->flush();
 
         return $this->redirectToRoute('map');
     }
+
 
 
     /**

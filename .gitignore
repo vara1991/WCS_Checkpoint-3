@@ -1,4 +1,5 @@
 ###> General (MacOS, PHPStorm...) ###
+.history
 .idea/*
 npm-debug.log
 yarn-error.log
