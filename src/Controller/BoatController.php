@@ -105,4 +105,14 @@ class BoatController extends AbstractController
 
         return $this->redirectToRoute('boat_index');
     }
+
+    /**
+     * @Route("/boat/direct/{direction}",  requirements={"direction"="N|S|E|W", name="direction",)
+     * @param int $direction
+     * @return Response
+     */
+    public function moveDirection (int $direction): Response
+    {
+        return $this->redirectToRoute('map');
+    }
 }
