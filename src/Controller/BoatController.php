@@ -10,6 +10,7 @@ use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
+use App\Services\MapManagerService;
 
 /**
  * @Route("/boat")
@@ -17,9 +18,16 @@ use Symfony\Component\Routing\Annotation\Route;
 class BoatController extends AbstractController
 {
 
+    private $mapManagerService;
+
+    public function __construct(MapManagerService $mapManagerService)
+    {
+        $this->mapManagerService = $mapManagerService;
+    }
+
     /**
      * Move the boat to coord x,y
-     * @Route("/move/{x}/{y}", name="moveBoat", requirements={"x"="\d+", "y"="\d+"}))
+     * @Route("/move/{x}/{y}", name="moveBoat", requirements={"x"="\d+", "y"="\d+"}, ))
      */
     public function moveBoat(int $x, int $y, BoatRepository $boatRepository, EntityManagerInterface $em) :Response
     {
@@ -32,6 +40,43 @@ class BoatController extends AbstractController
         return $this->redirectToRoute('map');
     }
 
+    /**
+     * Move the boat
+     * @Route("/direction/{d}", name="moveDirection", requirements={"d"="(N|W|S|E)"}))
+     */
+    public function moveDirection($d, BoatRepository $boatRepository, EntityManagerInterface $em): Response
+    {
+        $boat = $boatRepository->findOneBy([]);
+        $x = $boat->getCoordX();
+        $y = $boat->getCoordY();
+        if($d === 'N'){
+            $y--;
+            $boat->setCoordX($x);
+            $boat->setCoordY($y);
+        }
+        if($d === 'E'){
+            $x++;
+            $boat->setCoordX($x);
+            $boat->setCoordY($y);
+        }
+        if($d === 'S'){
+            $y++;
+            $boat->setCoordX($x);
+            $boat->setCoordY($y);
+        }
+        if($d === 'W'){
+            $x--;
+            $boat->setCoordX($x);
+            $boat->setCoordY($y);
+        }
+        $em->flush();
+        //if $this->mapManagerService->tileExists($x, $y){
+           // $em->flush();
+        //} else {
+         //   flash massage
+        //}
+        return $this->redirectToRoute('map');
+    }
 
     /**
      * @Route("/", name="boat_index", methods="GET")

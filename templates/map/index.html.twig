@@ -11,15 +11,18 @@
             <div class="col-10">
                 <div class="map">
                     {% if map is empty %}
-                        <div class="alert alert-warning">You are still on the firm ground, you have to load fixtures first !</div>
+                        <div class="alert alert-warning">You are still on the firm ground, you have to load fixtures
+                            first !
+                        </div>
                     {% endif %}
                     {% for y in 0..6 %}
                         <div class="row">
                             {% for x in 0..12 %}
                                 {% if map[x][y] is defined %}
                                     <div class="tile col-1 {{ map[x][y].type }}">
-                                        <div class="tile-name">{{ map[x][y].name ?? ' '}}</div>
-                                        <div class="tile-name coords">{{ map[x][y].coordX }},{{ map[x][y].coordY }}</div>
+                                        <div class="tile-name">{{ map[x][y].name ?? ' ' }}</div>
+                                        <div class="tile-name coords">{{ map[x][y].coordX }}
+                                            ,{{ map[x][y].coordY }}</div>
                                         {% if boat.coordX == x and boat.coordY == y %}
                                             <img class="boat img-fluid" src="{{ asset('assets/images/boat.png') }}"
                                                  alt="boat"/>
@@ -35,10 +38,19 @@
                 <div class="infos">
                     <h2>Information</h2>
                     {# Add here informations about current ship position #}
+                    Coordinate x: {{ boat.coordX }}
+                    <br>
+                    Coordinate y: {{ boat.coordY }}
+                    <br>
+                    Tile: {{ tile.type }}
                 </div>
                 <div class="navigation">
                     <h2>Navigation</h2>
                     {# Add here N/S/E/W buttons #}
+                    <a href="{{ path('moveDirection', {'d':'N'}) }}">North</a><br>
+                    <a href="{{ path('moveDirection', {'d':'E'}) }}">East</a><br>
+                    <a href="{{ path('moveDirection', {'d':'S'}) }}">South</a><br>
+                    <a href="{{ path('moveDirection', {'d':'W'}) }}">West</a><br>
                 </div>
             </div>
         </div>
