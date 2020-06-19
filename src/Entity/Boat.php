@@ -31,6 +31,11 @@ class Boat
      */
     private $coordY;
 
+    /**
+     * @ORM\Column(type="boolean")
+     */
+    private $hasTreasure;
+
     public function getId(): ?int
     {
         return $this->id;
@@ -68,6 +73,18 @@ class Boat
     public function setCoordY(int $coordY): self
     {
         $this->coordY = $coordY;
+
+        return $this;
+    }
+
+    public function getHasTreasure(): bool
+    {
+        return $this->hasTreasure;
+    }
+
+    public function setHasTreasure($hasTreasure): bool
+    {
+        $this->hasTreasure = $hasTreasure;
 
         return $this;
     }

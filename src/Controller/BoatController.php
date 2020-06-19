@@ -18,8 +18,32 @@ class BoatController extends AbstractController
 {
 
     /**
+     * Move the boat
+     * @Route("/boat/direction/{move}", name="moveDirection")
+     * @param $move
+     * @param BoatRepository $boatRepository
+     * @param EntityManagerInterface $em
+     * @return Response
+     */
+    public function moveDirection($move, BoatRepository $boatRepository, EntityManagerInterface $em): Response
+    {
+        $boat = $boatRepository->findOneBy([]);
+        if ($move === "N") {$coord = $boat->getCoordY() - 1; $boat->setCoordY($coord);
+        } elseif ($move === "S") {$coord = $boat->getCoordY() + 1; $boat->setCoordY($coord);
+        } elseif ($move === "E") {$coord = $boat->getCoordX() + 1; $boat->setCoordX($coord);
+        } elseif ($move === "W") {$coord = $boat->getCoordX() - 1; $boat->setCoordX($coord);
+        }
+        $em->flush();
+        return $this->redirectToRoute('map');
+    }
+    /**
      * Move the boat to coord x,y
      * @Route("/move/{x}/{y}", name="moveBoat", requirements={"x"="\d+", "y"="\d+"}))
+     * @param int $x
+     * @param int $y
+     * @param BoatRepository $boatRepository
+     * @param EntityManagerInterface $em
+     * @return Response
      */
     public function moveBoat(int $x, int $y, BoatRepository $boatRepository, EntityManagerInterface $em) :Response
     {
@@ -35,6 +59,8 @@ class BoatController extends AbstractController
 
     /**
      * @Route("/", name="boat_index", methods="GET")
+     * @param BoatRepository $boatRepository
+     * @return Response
      */
     public function index(BoatRepository $boatRepository): Response
     {
@@ -43,6 +69,8 @@ class BoatController extends AbstractController
 
     /**
      * @Route("/new", name="boat_new", methods="GET|POST")
+     * @param Request $request
+     * @return Response
      */
     public function new(Request $request): Response
     {
@@ -66,6 +94,8 @@ class BoatController extends AbstractController
 
     /**
      * @Route("/{id}", name="boat_show", methods="GET")
+     * @param Boat $boat
+     * @return Response
      */
     public function show(Boat $boat): Response
     {
@@ -74,6 +104,9 @@ class BoatController extends AbstractController
 
     /**
      * @Route("/{id}/edit", name="boat_edit", methods="GET|POST")
+     * @param Request $request
+     * @param Boat $boat
+     * @return Response
      */
     public function edit(Request $request, Boat $boat): Response
     {
@@ -94,6 +127,9 @@ class BoatController extends AbstractController
 
     /**
      * @Route("/{id}", name="boat_delete", methods="DELETE")
+     * @param Request $request
+     * @param Boat $boat
+     * @return Response
      */
     public function delete(Request $request, Boat $boat): Response
     {
