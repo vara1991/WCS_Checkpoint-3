@@ -5,8 +5,13 @@ namespace App\Controller;
 use App\Entity\Boat;
 use App\Form\BoatType;
 use App\Repository\BoatRepository;
+use App\Repository\TileRepository;
+use App\Service\MapManager;
+use Doctrine\Migrations\Version\Direction;
 use Doctrine\ORM\EntityManagerInterface;
+use http\Message;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
@@ -104,5 +109,38 @@ class BoatController extends AbstractController
         }
 
         return $this->redirectToRoute('boat_index');
+    }
+
+    /**
+     * @route("/boat/direction/{direction}", name="boat_direction")
+     * @param BoatRepository $boatRepository
+     * @param Direction $direction
+     * @param EntityManagerInterface $em
+     * @param MapManager $mapManager
+     * @param TileRepository $tileRepository
+     * @return Response
+     */
+    public function moveDirection (BoatRepository $boatRepository,  $direction, EntityManagerInterface $em, MapManager $mapManager,TileRepository $tileRepository ): Response
+    {
+        $boat = $boatRepository->findOneBy([]);
+        if ($direction === "N") {
+            $coord = $boat->getCoordY() - 1;
+            $boat->setCoordY($coord);
+        } elseif ($direction === "E") {
+            $coord = $boat->getCoordX() + 1;
+            $boat->setCoordX($coord);
+        } elseif ($direction === "S") {
+            $coord = $boat->getCoordY() + 1;
+            $boat->setCoordY($coord);
+        } elseif ($direction === "W") {
+            $coord = $boat->getCoordX() - 1;
+            $boat->setCoordX($coord);
+        }
+        if ($mapManager->tileExists($boat->getCoordX(), $boat->getCoordY())) {
+            $em->flush();
+        } else {
+            $this->addFlash('danger', "You can't go there !");
+        }
+        return $this->redirectToRoute('map');
     }
 }
