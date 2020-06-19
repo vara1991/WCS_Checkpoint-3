@@ -31,18 +31,15 @@ class BoatController extends AbstractController
      * Move the boat to coord x,y
      * @Route("/move/{x}/{y}", name="moveBoat", requirements={"x"="\d+", "y"="\d+"}))
      */
-    public function moveBoat(int $x, int $y, BoatRepository $boatRepository, EntityManagerInterface $em, TileRepository $tileRepository, MapManager $mapManager): Response
+    public function moveBoat(int $x, int $y, BoatRepository $boatRepository, EntityManagerInterface $em, TileRepository $tileRepository): Response
     {
-        $mapManager = new MapManager();
         $boat = $boatRepository->findOneBy([]);
         $boat->setCoordX($x);
         $boat->setCoordY($y);
-        $mapManager->tileExists($mapManager);
 
         $em->flush();
-        if ($mapManager = true) {
-            return $this->redirectToRoute('map');
-        }
+
+        return $this->redirectToRoute('map');
     }
 
     /**
@@ -50,7 +47,7 @@ class BoatController extends AbstractController
      * @Route("/boat/direction/{direction}", name="moveDirection")
      * @param $direction
      */
-    public function moveDirection($direction, BoatRepository $boatRepository, EntityManagerInterface $em): Response
+    public function moveDirection($direction, BoatRepository $boatRepository, EntityManagerInterface $em, MapManager $mapManager): Response
     {
         $boat = $boatRepository->findOneBy([]);
 
@@ -71,9 +68,12 @@ class BoatController extends AbstractController
             $boat->setCoordX($coord);
         }
 
-        $em->flush();
+        if ($mapManager->tileExists($boat->getCoordX(), $boat->getCoordY())) {
+            $em->flush();
+        }
         return $this->redirectToRoute('map');
     }
+
 
     /**
      * @Route("/", name="boat_index", methods="GET")

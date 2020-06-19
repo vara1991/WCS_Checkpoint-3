@@ -8,21 +8,12 @@ use App\Repository\TileRepository;
 
 class MapManager
 {
-    /**
-     * @var bool
-     */
-    private $tileExists;
-
-    public function tileExists(int $x, int $y, TileRepository $tileRepository)
+    public function tileExists(int $x, int $y)
     {
-        $tileExists = $tileRepository->findAll();
-        $x = $this->getCoordX($x);
-        $y = $this->getCoordY($y);
-
-        if (!null($x) && !null($y)) {
-            return $tileExists = true;
+        if ($y > 5 || $y < 0 || ($x > 11 || $x < 0)) {
+            return false;
         } else {
-            return $tileExists = false;
+            return true;
         }
     }
 }
