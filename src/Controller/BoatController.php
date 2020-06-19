@@ -17,11 +17,20 @@ use Symfony\Component\Routing\Annotation\Route;
 class BoatController extends AbstractController
 {
 
+    /* INJECTION DE DEPENDANCE*/
+    private $boatRepository;
+
+    public function __construct(BoatRepository $boatRepository)
+    {
+        $this->boatRepository = $boatRepository;
+    }
+
+
     /**
      * Move the boat to coord x,y
      * @Route("/move/{x}/{y}", name="moveBoat", requirements={"x"="\d+", "y"="\d+"}))
      */
-    public function moveBoat(int $x, int $y, BoatRepository $boatRepository, EntityManagerInterface $em) :Response
+    public function moveBoat(int $x, int $y, BoatRepository $boatRepository, EntityManagerInterface $em): Response
     {
         $boat = $boatRepository->findOneBy([]);
         $boat->setCoordX($x);
@@ -32,6 +41,39 @@ class BoatController extends AbstractController
         return $this->redirectToRoute('map');
     }
 
+    /**
+     * Move the boat
+     * @Route("/boat/direction", name="moveDirection")
+     * @param $direction
+     */
+    public function moveDirection($direction, BoatRepository $boatRepository, EntityManagerInterface $em): Response
+    {
+        $boat = $boatRepository->findOneBy([]);
+        $direction = 'N' or 'S' or 'E' or 'W';
+
+        $em->flush();
+
+        if ($direction === "N") {
+            $coord = $boat->getCoordY() - 1;
+            $boat->setCoordY($coord);
+
+        } elseif ($direction === "S") {
+            $coord = $boat->getCoordY() + 1;
+            $boat->setCoordY($coord);
+
+        } elseif ($direction === "E") {
+            $coord = $boat->getCoordX() + 1;
+            $boat->setCoordX($coord);
+
+        } elseif ($direction === "W") {
+            $coord = $boat->getCoordX() - 1;
+            $boat->setCoordX($coord);
+        }
+
+        return $this->redirectToRoute('map', [
+            'direction' => $direction,
+        ]);
+    }
 
     /**
      * @Route("/", name="boat_index", methods="GET")
