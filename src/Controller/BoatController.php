@@ -5,6 +5,8 @@ namespace App\Controller;
 use App\Entity\Boat;
 use App\Form\BoatType;
 use App\Repository\BoatRepository;
+use App\Repository\TileRepository;
+use App\Services\MapManager;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
@@ -25,20 +27,22 @@ class BoatController extends AbstractController
         $this->boatRepository = $boatRepository;
     }
 
-
     /**
      * Move the boat to coord x,y
      * @Route("/move/{x}/{y}", name="moveBoat", requirements={"x"="\d+", "y"="\d+"}))
      */
-    public function moveBoat(int $x, int $y, BoatRepository $boatRepository, EntityManagerInterface $em): Response
+    public function moveBoat(int $x, int $y, BoatRepository $boatRepository, EntityManagerInterface $em, TileRepository $tileRepository, MapManager $mapManager): Response
     {
+        $mapManager = new MapManager();
         $boat = $boatRepository->findOneBy([]);
         $boat->setCoordX($x);
         $boat->setCoordY($y);
+        $mapManager->tileExists($mapManager);
 
         $em->flush();
-
-        return $this->redirectToRoute('map');
+        if ($mapManager = true) {
+            return $this->redirectToRoute('map');
+        }
     }
 
     /**
