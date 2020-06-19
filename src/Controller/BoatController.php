@@ -5,6 +5,7 @@ namespace App\Controller;
 use App\Entity\Boat;
 use App\Form\BoatType;
 use App\Repository\BoatRepository;
+use App\service\MapManager;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
@@ -20,6 +21,11 @@ class BoatController extends AbstractController
     /**
      * Move the boat to coord x,y
      * @Route("/move/{x}/{y}", name="moveBoat", requirements={"x"="\d+", "y"="\d+"}))
+     * @param int $x
+     * @param int $y
+     * @param BoatRepository $boatRepository
+     * @param EntityManagerInterface $em
+     * @return Response
      */
     public function moveBoat(int $x, int $y, BoatRepository $boatRepository, EntityManagerInterface $em) :Response
     {
@@ -35,6 +41,8 @@ class BoatController extends AbstractController
 
     /**
      * @Route("/", name="boat_index", methods="GET")
+     * @param BoatRepository $boatRepository
+     * @return Response
      */
     public function index(BoatRepository $boatRepository): Response
     {
@@ -104,5 +112,43 @@ class BoatController extends AbstractController
         }
 
         return $this->redirectToRoute('boat_index');
+    }
+
+    /**
+     * @Route("/boat/direction/{d}", name="moveDirection")
+     * @param BoatRepository $boatRepository
+     * @param string $d
+     * @param EntityManagerInterface $em
+     * @param MapManager $mapManager
+     * @return Response
+     */
+    public function moveDirection(BoatRepository $boatRepository, string $d, EntityManagerInterface $em, MapManager $mapManager):Response
+    {
+        $boat = $boatRepository->findOneBy([]);
+
+        if ($d === "N") {
+            $coord = $boat->getCoordY() - 1;
+            $boat->setCoordY($coord);
+        } elseif ($d === "E") {
+            $coord = $boat->getCoordX() + 1;
+            $boat->setCoordX($coord);
+        } elseif ($d === "S") {
+            $coord = $boat->getCoordY() + 1;
+            $boat->setCoordY($coord);
+        } elseif ($d === "W") {
+            $coord = $boat->getCoordX() - 1;
+            $boat->setCoordX($coord);
+        }
+        if ($mapManager->tileExists($boat->getCoordX(), $boat->getCoordY()) === true) {
+            $em->flush();
+        } else {
+            $this->addFlash('danger', 'This direction is not possible !');
+        }
+
+        if ($mapManager->checkTreasure($boat)) {
+            $this->addFlash('success', 'You found the treasure !!');
+        }
+
+        return $this->redirectToRoute('map');
     }
 }
