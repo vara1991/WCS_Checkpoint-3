@@ -5,7 +5,6 @@ namespace App\Controller;
 use App\Entity\Boat;
 use App\Form\BoatType;
 use App\Repository\BoatRepository;
-use App\Repository\TileRepository;
 use App\Services\MapManager;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -31,7 +30,7 @@ class BoatController extends AbstractController
      * Move the boat to coord x,y
      * @Route("/move/{x}/{y}", name="moveBoat", requirements={"x"="\d+", "y"="\d+"}))
      */
-    public function moveBoat(int $x, int $y, BoatRepository $boatRepository, EntityManagerInterface $em, TileRepository $tileRepository): Response
+    public function moveBoat(int $x, int $y, BoatRepository $boatRepository, EntityManagerInterface $em): Response
     {
         $boat = $boatRepository->findOneBy([]);
         $boat->setCoordX($x);
@@ -70,7 +69,7 @@ class BoatController extends AbstractController
 
         if ($mapManager->tileExists($boat->getCoordX(), $boat->getCoordY())) {
             $em->flush();
-        } else{
+        } else {
             $this->addFlash('error', 'Wrong Way ! ');
         }
         return $this->redirectToRoute('map');
@@ -82,7 +81,9 @@ class BoatController extends AbstractController
      */
     public function index(BoatRepository $boatRepository): Response
     {
-        return $this->render('boat/index.html.twig', ['boats' => $boatRepository->findAll()]);
+        return $this->render('boat/index.html.twig', [
+            'boats' => $boatRepository->findAll(),
+        ]);
     }
 
     /**
