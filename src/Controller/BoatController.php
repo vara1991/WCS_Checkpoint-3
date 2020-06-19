@@ -10,6 +10,7 @@ use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
+use App\Service\MapManagerService;
 
 /**
  * @Route("/boat")
@@ -21,9 +22,9 @@ class BoatController extends AbstractController
      * Move the boat to coord x,y
      * @Route("/move/{x}/{y}", name="moveBoat", requirements={"x"="\d+", "y"="\d+"}))
      */
-    public function moveBoat(int $x, int $y, BoatRepository $boatRepository, EntityManagerInterface $em) :Response
+    public function moveBoat(int $x, int $y, BoatRepository $boatRepository, EntityManagerInterface $em) : Response
     {
-        $boat = $boatRepository->findOneBy([]);
+        $boat = $boatRepository->findOneBy(['id' => 1]);
         $boat->setCoordX($x);
         $boat->setCoordY($y);
 
@@ -32,6 +33,54 @@ class BoatController extends AbstractController
         return $this->redirectToRoute('map');
     }
 
+    /**
+     * Move direction to North, South, East, West
+     * @Route("/direction/{direction}", name="moveDirection", requirements={"direction"="[NSEW]"})
+     */
+    public function moveDirection($direction, BoatRepository $boatRepository, EntityManagerInterface $em, MapManagerService $mapManagerService) : Response
+    {
+
+        if ($direction === 'N'){
+            $boat = $boatRepository->findOneBy(['id' => 1]);
+            $north = $boat->getCoordY();
+            $direction = $north - 1;
+            $boat->setCoordY($direction);
+            $em->flush();
+        }
+
+        if ($direction === 'S'){
+            $boat = $boatRepository->findOneBy(['id' => 1]);
+            $south = $boat->getCoordY();
+            $direction = $south + 1;
+            $boat->setCoordY($direction);
+            $em->flush();
+        }
+
+        if ($direction === 'E'){
+            $boat = $boatRepository->findOneBy(['id' => 1]);
+            $east = $boat->getCoordX();
+            $direction = $east + 1;
+            $boat->setCoordX($direction);
+            $em->flush();
+        }
+
+        if ($direction === 'W'){
+            $boat = $boatRepository->findOneBy(['id' => 1]);
+            $west = $boat->getCoordX();
+            $direction = $west - 1;
+            $boat->setCoordX($direction);
+            $em->flush();
+        }
+        $x = $boat->getCoordX();
+        $y = $boat->getCoordY();
+        $exists = $mapManagerService->tileExists($x, $y);
+        if ($exists === false) {
+            $this->addFlash('error', 'This is an error message');
+            return $this->redirectToRoute('map');
+        }
+
+        return $this->redirectToRoute('map');
+    }
 
     /**
      * @Route("/", name="boat_index", methods="GET")
