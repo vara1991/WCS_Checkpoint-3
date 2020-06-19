@@ -22,6 +22,11 @@ class Tile
     private $type;
 
     /**
+     * @ORM\Column(type="boolean")
+     */
+    private $hasTreasure;
+
+    /**
      * @ORM\Column(type="integer")
      */
     private $coordX;
@@ -72,4 +77,21 @@ class Tile
 
         return $this;
     }
+
+    /**
+     * @return mixed
+     */
+    public function getHasTreasure()
+    {
+        return $this->hasTreasure;
+    }
+
+    /**
+     * @param mixed $hasTreasure
+     */
+    public function setHasTreasure($hasTreasure): void
+    {
+        $this->hasTreasure = $hasTreasure;
+    }
+
 }

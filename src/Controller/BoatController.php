@@ -5,6 +5,7 @@ namespace App\Controller;
 use App\Entity\Boat;
 use App\Form\BoatType;
 use App\Repository\BoatRepository;
+use App\Service\MapManager;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
@@ -21,13 +22,43 @@ class BoatController extends AbstractController
      * Move the boat to coord x,y
      * @Route("/move/{x}/{y}", name="moveBoat", requirements={"x"="\d+", "y"="\d+"}))
      */
-    public function moveBoat(int $x, int $y, BoatRepository $boatRepository, EntityManagerInterface $em) :Response
+    public function moveBoat(int $x, int $y, BoatRepository $boatRepository, EntityManagerInterface $em): Response
     {
         $boat = $boatRepository->findOneBy([]);
         $boat->setCoordX($x);
         $boat->setCoordY($y);
 
         $em->flush();
+
+        return $this->redirectToRoute('map');
+    }
+
+    /**
+     * @Route("/direction/{direction}", name="boat_direction", methods="GET")
+     * @return Response
+     */
+    public function moveDirection(string $direction, BoatRepository $boatRepository, EntityManagerInterface $em, MapManager $mapManager): Response
+    {
+        $boat = $boatRepository->findOneBy([]);
+        if ($direction === 'N' && $mapManager) {
+            $boat->setCoordY($boat->getCoordY()-1);
+        } elseif ($direction === 'S') {
+            $boat->setCoordY($boat->getCoordY()+1);
+        } elseif ($direction === 'E') {
+            $boat->setCoordX($boat->getCoordX()+1);
+        } elseif ($direction === 'W') {
+            $boat->setCoordX($boat->getCoordX()-1);
+        }
+        if ($mapManager->tileExists($boat->getCoordX(), $boat->getCoordY())) {
+            $em->flush();
+        } else {
+            $this->addFlash('danger', "You can't go there !");
+        }
+
+        if ($mapManager->checkTreasure($boat)) {
+            $this->addFlash('success', 'You found the Treasure !');
+        }
+
 
         return $this->redirectToRoute('map');
     }
