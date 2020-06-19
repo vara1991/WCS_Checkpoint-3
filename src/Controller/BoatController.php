@@ -3,6 +3,7 @@
 namespace App\Controller;
 
 use App\Entity\Boat;
+use App\Entity\Tile;
 use App\Form\BoatType;
 use App\Repository\BoatRepository;
 use Doctrine\ORM\EntityManagerInterface;
@@ -71,9 +72,14 @@ class BoatController extends AbstractController
             $boat->setCoordX($direction);
             $em->flush();
         }
+        $tile = $this->getDoctrine()
+            ->getRepository(Tile::class)
+            ->findAll();
+
         $x = $boat->getCoordX();
         $y = $boat->getCoordY();
         $exists = $mapManagerService->tileExists($x, $y);
+        dd($exists); die;
         if ($exists === false) {
             $this->addFlash('error', 'This is an error message');
             return $this->redirectToRoute('map');

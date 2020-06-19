@@ -31,12 +31,10 @@
     <div class="container">
         <div class="row">
             <div class="col-sm-12">
-                {% for label, messages in app.flashes('error') %}
-                    {% for message in messages %}
-                        <div class="alert alert-{{ label }}">
-                            {{ message }}
-                        </div>
-                    {% endfor %}
+                {% for message in app.flashes('error') %}
+                    <div class="flash-error">
+                        {{ message }}
+                    </div>
                 {% endfor %}
             </div>
         </div>
