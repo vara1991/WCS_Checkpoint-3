@@ -2,6 +2,7 @@
 
 namespace App\Controller;
 
+use App\Repository\TileRepository;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
@@ -13,7 +14,7 @@ class MapController extends AbstractController
     /**
      * @Route("/map", name="map")
      */
-    public function displayMap(BoatRepository $boatRepository) :Response
+    public function displayMap(BoatRepository $boatRepository, TileRepository $tileRepository) :Response
     {
         $em = $this->getDoctrine()->getManager();
         $tiles = $em->getRepository(Tile::class)->findAll();
@@ -24,9 +25,15 @@ class MapController extends AbstractController
 
         $boat = $boatRepository->findOneBy([]);
 
+        $positionY = $boat->getCoordY();
+        $positionX = $boat->getCoordX();
+
+        $current_tile = $tileRepository->find($tile);
+
         return $this->render('map/index.html.twig', [
             'map'  => $map ?? [],
             'boat' => $boat,
+            'current_tile' => $current_tile,
         ]);
     }
 }

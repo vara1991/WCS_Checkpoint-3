@@ -4,6 +4,7 @@ namespace App\Controller;
 
 use App\Entity\Tile;
 use App\Form\TileType;
+use App\Repository\BoatRepository;
 use App\Repository\TileRepository;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
@@ -18,9 +19,13 @@ class TileController extends AbstractController
     /**
      * @Route("/", name="tile_index", methods="GET")
      */
-    public function index(TileRepository $tileRepository): Response
+    public function index(TileRepository $tileRepository, BoatRepository $boatRepository): Response
     {
-        return $this->render('tile/index.html.twig', ['tiles' => $tileRepository->findAll()]);
+        $boat = $boatRepository->findOneBy([]);
+        $current_tile = $tileRepository->find($boat->getCoordY(), $boat->getCoordX());
+        return $this->render('tile/index.html.twig', [
+            'tiles' => $tileRepository->findAll(),
+        ]);
     }
 
     /**

@@ -5,6 +5,8 @@ namespace App\Controller;
 use App\Entity\Boat;
 use App\Form\BoatType;
 use App\Repository\BoatRepository;
+use App\Repository\TileRepository;
+use App\Services\MapManager;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
@@ -104,5 +106,71 @@ class BoatController extends AbstractController
         }
 
         return $this->redirectToRoute('boat_index');
+    }
+
+    /**
+     * @Route("/direction/{param}", name="boat_direction")
+     * @param $param
+     * @param BoatRepository $boatRepository
+     * @param EntityManagerInterface $em
+     * @param MapManager $mapManager
+     * @return \Symfony\Component\HttpFoundation\RedirectResponse
+     */
+    public function moveDirection($param, BoatRepository $boatRepository, EntityManagerInterface $em, MapManager $mapManager, TileRepository $tileRepository)
+    {
+        $boat = $boatRepository->findOneBy([]);
+        $positionY = $boat->getCoordY();
+        $positionX = $boat->getCoordX();
+        if ($param === "N") {
+            $positionY += -1;
+            $boat->setCoordY($positionY);
+            $result = $mapManager->tileExists($boat->getCoordX(), $boat->getCoordY());
+            if ($result === true){
+                $em->flush();
+            }else{
+                echo $error = "Wrong destination Jack ! Come back";
+            }
+
+            return $this->redirectToRoute('map');
+
+        }elseif ($param === "S") {
+            $positionY += +1;
+            $boat->setCoordY($positionY);
+            $result = $mapManager->tileExists($boat->getCoordX(), $boat->getCoordY());
+            if ($result === true){
+                $em->flush();
+            }else{
+                echo $error = "Wrong destination Jack ! Come back";
+            }
+
+            return $this->redirectToRoute('map');
+
+        }elseif ($param === "W") {
+            $positionX += -1;
+            $boat->setCoordX($positionX);
+            $result = $mapManager->tileExists($boat->getCoordX(), $boat->getCoordY());
+            if ($result === true){
+                $em->flush();
+            }else{
+                echo $error = "Wrong destination Jack ! Come back";
+            }
+
+            return $this->redirectToRoute('map');
+
+        }elseif ($param === "E") {
+            $positionX += +1;
+            $boat->setCoordX($positionX);
+            $result = $mapManager->tileExists($boat->getCoordX(), $boat->getCoordY());
+            if ($result === true){
+                $em->flush();
+            }else{
+                echo $error = "Wrong destination Jack ! Come back";
+            }
+
+            return $this->redirectToRoute('map');
+
+        }else{
+            return $this->redirectToRoute('map');
+        }
     }
 }
