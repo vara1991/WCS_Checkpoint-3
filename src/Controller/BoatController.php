@@ -5,6 +5,7 @@ namespace App\Controller;
 use App\Entity\Boat;
 use App\Form\BoatType;
 use App\Repository\BoatRepository;
+use App\Service\MapManager;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
@@ -16,29 +17,67 @@ use Symfony\Component\Routing\Annotation\Route;
  */
 class BoatController extends AbstractController
 {
+    private $boatRepository;
+    private $mapManager;
+    private $em;
+
+    public function __construct(BoatRepository $boatRepository, EntityManagerInterface $em, MapManager $mapManager){
+        $this->boatRepository = $boatRepository;
+        $this->mapManager = $mapManager;
+        $this->em = $em;
+    }
 
     /**
      * Move the boat to coord x,y
      * @Route("/move/{x}/{y}", name="moveBoat", requirements={"x"="\d+", "y"="\d+"}))
      */
-    public function moveBoat(int $x, int $y, BoatRepository $boatRepository, EntityManagerInterface $em) :Response
+    public function moveBoat(int $x, int $y) :Response
     {
-        $boat = $boatRepository->findOneBy([]);
+        $boat = $this->boatRepository->findOneBy([]);
         $boat->setCoordX($x);
         $boat->setCoordY($y);
 
-        $em->flush();
+        $this->em->flush();
 
         return $this->redirectToRoute('map');
     }
 
+     /**
+     * Move the boat to direction N|S|E|W
+     * @Route("/move/{direction}", name="moveDirection", requirements={"direction"="N|S|E|W"})
+     */
+    public function moveDirection($direction) :Response
+    {
+        $boat = $this->boatRepository->findOneBy([]);
+        if($direction === "N"){
+            $boat->setCoordY($boat->getCoordY() - 1);
+        }
+        if($direction === "S"){
+            $boat->setCoordY($boat->getCoordY() + 1);
+        }
+        if($direction === "E"){
+            $boat->setCoordX($boat->getCoordX() + 1);
+        }
+        if($direction === "W"){
+            $boat->setCoordX($boat->getCoordX() - 1);
+        }
+        if($this->mapManager->tileExist($boat->getCoordX(), $boat->getCoordY()) === true){
+            if($this->mapManager->checkTreasure($boat) === true){
+                $this->addFlash('success', 'Treasure found !');
+            }
+            $this->em->flush();
+        } else {
+            $this->addFlash('warning', 'Map Not Found !');
+        }
+        return $this->redirectToRoute('map');
+    }
 
     /**
      * @Route("/", name="boat_index", methods="GET")
      */
-    public function index(BoatRepository $boatRepository): Response
+    public function index(): Response
     {
-        return $this->render('boat/index.html.twig', ['boats' => $boatRepository->findAll()]);
+        return $this->render('boat/index.html.twig', ['boats' => $this->boatRepository->findAll()]);
     }
 
     /**

@@ -23,6 +23,7 @@
                                         {% if boat.coordX == x and boat.coordY == y %}
                                             <img class="boat img-fluid" src="{{ asset('assets/images/boat.png') }}"
                                                  alt="boat"/>
+                                            <div class="tile-name">{{ map[x][y].type}}</div>
                                         {% endif %}
                                     </div>
                                 {% endif %}
@@ -34,11 +35,15 @@
             <div class="col-2">
                 <div class="infos">
                     <h2>Information</h2>
-                    {# Add here informations about current ship position #}
+                    <p>{{boat.name}} is on : {{ boat.coordX }} - {{ boat.coordY }}</p>
+                    <p>Tile : {{ tile_type }}</p>
                 </div>
                 <div class="navigation">
                     <h2>Navigation</h2>
-                    {# Add here N/S/E/W buttons #}
+                    <a href="{{ path('moveDirection', {'direction' : 'N' }) }}" class="btn btn-warning btn-sm">N</a> 
+                    <a href="{{ path('moveDirection', {'direction' : 'S' }) }}" class="btn btn-warning btn-sm">S</a> 
+                    <a href="{{ path('moveDirection', {'direction' : 'E' }) }}" class="btn btn-warning btn-sm">E</a> 
+                    <a href="{{ path('moveDirection', {'direction' : 'W' }) }}" class="btn btn-warning btn-sm">W</a> 
                 </div>
             </div>
         </div>
